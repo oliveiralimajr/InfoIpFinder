@@ -12,7 +12,7 @@ parser.add_option("-x", "--xlsxfile", action="store", type="string", dest="xlsxf
                   help="[Obrigatorio] Manda o output pro arquivo xlsx desejado ", metavar="XLSXFILE")
 
 parser.add_option("-c", "--collect", action="store", type="string", dest="collectmet",
-                  help="[Obrigatorio] dados que deseja coletar, opcoes: a= all, b= basics, c= somente Pais de origem", metavar="Collect")
+                  help="[Obrigatorio] dados que deseja coletar, opcoes: a = all, b= basics, c= somente Pais de origem", metavar="Collect")
 
 parser.add_option("-q", "--quiet",
                   action="store_false", dest="verbose", default=True,
@@ -34,8 +34,13 @@ for linha in file:
     url = "http://ipinfo.io/"+ip+"?token="
     r = requests.get(url)
     resp = r.text
-    print resp
+    print (resp)
     parse = json.loads(r.text)
+#consulta outro trem
+    url = "https://api11.scamalytics.com/stone.com.br/?key=&ip="+ip
+    r = requests.get(url)
+    resp = r.text
+    parsedois = json.loads(r.text)
 
 #paeseia as infos
     ipcap = parse['ip']
@@ -46,6 +51,9 @@ for linha in file:
     cidade = parse['city']
     localizacao = parse['loc']
     pais = parse['country']
+    risco = parsedois['risk']
+    score = parsedois['score']
+
 
     planilha1 = wb.active
     cel = cel + 1
@@ -70,6 +78,8 @@ for linha in file:
         planilha1.cell(row=cel, column=6, value=orga)
         planilha1.cell(row=cel, column=7, value=hostname)
         planilha1.cell(row=cel, column=8, value=timezone)
+        planilha1.cell(row=cel, column=9, value=risco)
+        planilha1.cell(row=cel, column=10, value=score)
 
 
 font = Font(name='Calibri',
@@ -139,6 +149,8 @@ if "a" in options.collectmet:
     planilha1.cell(row=cel, column=6, value="Org")
     planilha1.cell(row=cel, column=7, value="Hostname")
     planilha1.cell(row=cel, column=8, value="Timezone")
+    planilha1.cell(row=cel, column=9, value="Risco")
+    planilha1.cell(row=cel, column=10, value="Score")
     planilha1.column_dimensions["A"].width = 20
     planilha1.column_dimensions["B"].width = 20
     planilha1.column_dimensions["C"].width = 30
@@ -147,6 +159,8 @@ if "a" in options.collectmet:
     planilha1.column_dimensions["F"].width = 40
     planilha1.column_dimensions["G"].width = 40
     planilha1.column_dimensions["H"].width = 40
+    planilha1.column_dimensions["I"].width = 40
+    planilha1.column_dimensions["J"].width = 40
     planilha1["A1"].font = font
     planilha1["B1"].font = font
     planilha1["C1"].font = font
@@ -155,6 +169,8 @@ if "a" in options.collectmet:
     planilha1["F1"].font = font
     planilha1["G1"].font = font
     planilha1["H1"].font = font
+    planilha1["I1"].font = font
+    planilha1["J1"].font = font
     planilha1["A1"].fill = fill
     planilha1["B1"].fill = fill
     planilha1["C1"].fill = fill
@@ -163,10 +179,12 @@ if "a" in options.collectmet:
     planilha1["F1"].fill = fill
     planilha1["G1"].fill = fill
     planilha1["H1"].fill = fill
+    planilha1["I1"].fill = fill
+    planilha1["J1"].fill = fill
 
 planilha1.alignment = alignment
 
 wb.save(filename = options.xlsxfile)
-print "[+] Arquivo escrito com sucesso, {}".format(options.xlsxfile)
+print ("[+] Arquivo escrito com sucesso, {}".format(options.xlsxfile))
 
 file.close()
